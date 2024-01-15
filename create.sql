@@ -2,8 +2,8 @@ CREATE TABLE Producent (
     ID_producenta INT PRIMARY KEY IDENTITY(1,1),
     Nazwa_producenta VARCHAR(60) NOT NULL,
     Kraj_pochodzenia VARCHAR(60),
-    Rok_za³o¿enia INT NOT NULL,
-    Siedziba_g³ówna VARCHAR(255)
+    Rok_zaÅ‚oÅ¼enia INT NOT NULL,
+    Siedziba_gÅ‚Ã³wna VARCHAR(255)
 );
 
 CREATE TABLE Typ_nadwozia (
@@ -11,15 +11,15 @@ CREATE TABLE Typ_nadwozia (
     Nazwa_typu_nadwozia VARCHAR(20) NOT NULL
 );
 
-CREATE TABLE Jêzyki_obce (
-    ID_jêzyki_obce INT PRIMARY KEY IDENTITY(1,1),
-    Nazwa_jêzyka_obcego VARCHAR(20) NOT NULL
+CREATE TABLE JÄ™zyki_obce (
+    ID_jÄ™zyki_obce INT PRIMARY KEY IDENTITY(1,1),
+    Nazwa_jÄ™zyka_obcego VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE Osoba (
     ID INT PRIMARY KEY IDENTITY(1,1),
     Pesel VARCHAR(11) NOT NULL,
-    Imiê VARCHAR(60) NOT NULL,
+    ImiÄ™ VARCHAR(60) NOT NULL,
     Nazwisko VARCHAR(60) NOT NULL,
     Adres_email VARCHAR(60),
     Numer_kontaktowy VARCHAR(20) NOT NULL,
@@ -27,24 +27,24 @@ CREATE TABLE Osoba (
 );
 
 CREATE TABLE Sprzedawca (
-    ID INT PRIMARY KEY IDENTITY(1,1),
+	ID INT PRIMARY KEY,
     Stanowisko VARCHAR(60) NOT NULL,
     Data_zatrudnienia DATE NOT NULL,
     Liczba_transakcji INT,
-    Wartoœæ_transakcji DECIMAL(18, 2),
-    Jêzyki_obce INT,
-    FOREIGN KEY (ID) REFERENCES Osoba(ID),
-    FOREIGN KEY (Jêzyki_obce) REFERENCES Jêzyki_obce(ID_jêzyki_obce)
+    WartoÅ›Ä‡_transakcji DECIMAL(18, 2),
+    JÄ™zyki_obce INT,
+    FOREIGN KEY (ID) REFERENCES Osoba(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (JÄ™zyki_obce) REFERENCES JÄ™zyki_obce(ID_jÄ™zyki_obce)
 );
 
 CREATE TABLE Klient (
-    ID INT PRIMARY KEY IDENTITY(21,1),
+    ID INT PRIMARY KEY,
     Historia_transakcji VARCHAR(MAX),
     Data_ostatniego_zakupu DATE,
     Wydana_kwota DECIMAL(18, 2),
     Status_Gwarancji BIT DEFAULT 0,
     Preferowana_marka VARCHAR(60),
-    FOREIGN KEY (ID) REFERENCES Osoba(ID)
+    FOREIGN KEY (ID) REFERENCES Osoba(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Dostawca (
@@ -55,61 +55,60 @@ CREATE TABLE Dostawca (
     Adres_email_dostawcy VARCHAR(60)
 );
 
-
 CREATE TABLE Model (
     ID_modelu INT PRIMARY KEY IDENTITY(1,1),
     Nazwa_modelu VARCHAR(60) NOT NULL,
     Generacja VARCHAR(20),
     Typ_nadwozia INT,
-    Skrzynia_biegów VARCHAR(20),
-    Dostêpnoœæ BIT NOT NULL,
+    Skrzynia_biegÃ³w VARCHAR(20),
+    DostÄ™pnoÅ›Ä‡ BIT NOT NULL,
     ID_producenta INT,
-    FOREIGN KEY (ID_producenta) REFERENCES Producent(ID_producenta),
-    FOREIGN KEY (Typ_nadwozia) REFERENCES Typ_nadwozia(ID_typu_nadwozia),
+    FOREIGN KEY (ID_producenta) REFERENCES Producent(ID_producenta) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Typ_nadwozia) REFERENCES Typ_nadwozia(ID_typu_nadwozia)
 );
 
 CREATE TABLE Wersja (
     ID_wersji INT PRIMARY KEY IDENTITY(1,1),
     Nazwa_wersji VARCHAR(60) NOT NULL,
     Silnik VARCHAR(20),
-    Wyposa¿enie VARCHAR(MAX),
+    WyposaÅ¼enie VARCHAR(MAX),
     Opcje_dodatkowe VARCHAR(MAX),
     ID_modelu INT,
-    FOREIGN KEY (ID_modelu) REFERENCES Model(ID_modelu)
+    FOREIGN KEY (ID_modelu) REFERENCES Model(ID_modelu) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Samochód (
+CREATE TABLE SamochÃ³d (
     VIN VARCHAR(17) PRIMARY KEY NOT NULL,
     Rok_produkcji INT NOT NULL,
     Typ_paliwa VARCHAR(20),
     Kolor VARCHAR(20),
     Przebieg INT NOT NULL,
-	ID_wersji INT
-	FOREIGN KEY (ID_wersji) REFERENCES Wersja(ID_wersji)
+    ID_wersji INT,
+    FOREIGN KEY (ID_wersji) REFERENCES Wersja(ID_wersji) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Oferta (
     ID_oferty INT PRIMARY KEY IDENTITY(1,1),
-    Data_rozpoczêcia DATE NOT NULL,
-    Data_zakoñczenia DATE,
+    Data_rozpoczÄ™cia DATE NOT NULL,
+    Data_zakoÅ„czenia DATE,
     Kwota_oferty DECIMAL(18, 2) NOT NULL,
     Okres_gwarancji VARCHAR(20) NOT NULL,
     Status_oferty BIT NOT NULL,
     VIN VARCHAR(17),
-    FOREIGN KEY (VIN) REFERENCES Samochód(VIN)
+    FOREIGN KEY (VIN) REFERENCES SamochÃ³d(VIN) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Jazda_testowa (
     ID_jazdy_testowej INT PRIMARY KEY IDENTITY(1,1),
     Data_jazdy_testowej DATE NOT NULL,
-    Godzina_rozpoczêcia TIME NOT NULL,
-    Godzina_zakoñczenia TIME NOT NULL,
+    Godzina_rozpoczÄ™cia TIME NOT NULL,
+    Godzina_zakoÅ„czenia TIME NOT NULL,
     VIN VARCHAR(17) NOT NULL,
     Klient INT,
     Sprzedawca INT,
-    FOREIGN KEY (VIN) REFERENCES Samochód(VIN),
-    FOREIGN KEY (Klient) REFERENCES Klient(ID),
-    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID)
+    FOREIGN KEY (VIN) REFERENCES SamochÃ³d(VIN) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (Klient) REFERENCES Klient(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE Zakup (
@@ -119,17 +118,17 @@ CREATE TABLE Zakup (
     VIN VARCHAR(17) NOT NULL,
     Dostawca INT,
     Sprzedawca INT,
-    FOREIGN KEY (Dostawca) REFERENCES Dostawca(ID_dostawcy),
-    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID)
+    FOREIGN KEY (Dostawca) REFERENCES Dostawca(ID_dostawcy) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
 );
 
-CREATE TABLE Sprzeda¿ (
-    ID_sprzeda¿y INT PRIMARY KEY IDENTITY(1,1),
+CREATE TABLE SprzedaÅ¼ (
+    ID_sprzedaÅ¼y INT PRIMARY KEY IDENTITY(1,1),
     Kwota_transakcji DECIMAL(18, 2) NOT NULL,
     Data_transakcji DATE NOT NULL,
     VIN VARCHAR(17) NOT NULL,
     Klient INT,
     Sprzedawca INT,
-    FOREIGN KEY (Klient) REFERENCES Klient(ID),
-    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID)
+    FOREIGN KEY (Klient) REFERENCES Klient(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (Sprzedawca) REFERENCES Sprzedawca(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
 );
